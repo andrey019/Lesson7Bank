@@ -18,6 +18,13 @@ public class Client {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Account> accounts = new ArrayList<>();
 
+    public Client() {}
+
+    public Client(String name, String surname) {
+        this.name = name;
+        this.surname = surname;
+    }
+
     public void addAccount(Account account) {
         accounts.add(account);
         if (account.getClient() != this) {

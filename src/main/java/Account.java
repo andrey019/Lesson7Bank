@@ -31,6 +31,13 @@ public class Account {
 
     public Account() {}
 
+    public Account(long number, double money, Client client, Rate rate) {
+        this.number = number;
+        this.money = money;
+        this.client = client;
+        this.rate = rate;
+    }
+
 
     //private List<Transaction> transactions = new ArrayList<>();
 
