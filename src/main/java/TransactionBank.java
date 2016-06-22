@@ -92,8 +92,8 @@ public class TransactionBank {
 
     public boolean setFinalSum() {
         try {
-            if ( (initialSum > 0) && (giver.getMoney() >= initialSum) && (receiver != null) && (giver != null)) {
-                if (receiver.getRate().equals(giver.getRate())) {
+            if ( (initialSum > 0) && (giver.getMoney() >= initialSum) ) {
+                if ( receiver.getRate().getId() == giver.getRate().getId() ) {
                     finalSum = initialSum;
                     return true;
                 } else {
@@ -107,5 +107,28 @@ public class TransactionBank {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public boolean setFinalSum(Rate giver) {
+        try {
+            if ( receiver.getRate().getId() == giver.getId() ) {
+                finalSum = initialSum;
+                return true;
+            } else {
+                double giverConvertion = initialSum * giver.getBuyRate();
+                double receiverConvertion = giverConvertion / receiver.getRate().getSellRate();
+                finalSum = receiverConvertion;
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "id = " + id + ";\t date = " + date +"; giver = " + giver.getNumber() + "; receiver = " +
+                receiver.getNumber() + "; initial sum = " + initialSum + ";\t final sum = " + finalSum;
     }
 }

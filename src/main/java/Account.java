@@ -132,4 +132,10 @@ public class Account {
             transaction.setReceiver(this);
         }
     }
+
+    @Override
+    public String toString() {
+        return "id = " + id + ";\t number = " + number + "; owner = " + client.getName() + "\t " +
+                client.getSurname() + ";\t money = " + money + " " + rate.getCurrency();
+    }
 }

@@ -1,4 +1,5 @@
 import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 
 public class MainMenu extends Thread {
@@ -32,15 +33,24 @@ public class MainMenu extends Thread {
                     addTransaction();
                     break;
                 case "5":
-                    getAllClientMoney();
+                    addMoneyToAccount();
                     break;
                 case "6":
-                    //
+                    getAllClientMoney();
                     break;
                 case "7":
-                    //
+                    showAllEntities(Client.class);
                     break;
                 case "8":
+                    showAllEntities(Account.class);
+                    break;
+                case "9":
+                    showAllEntities(Rate.class);
+                    break;
+                case "10":
+                    showAllEntities(TransactionBank.class);
+                    break;
+                case "11":
                     System.exit(0);
                     break;
             }
@@ -85,10 +95,13 @@ public class MainMenu extends Thread {
         System.out.println("2) Add account");
         System.out.println("3) Add currency");
         System.out.println("4) Add transaction (transfer money between accounts)");
-        System.out.println("5) All client money");
-        System.out.println("6) ");
-        System.out.println("7) ");
-        System.out.println("8) Exit");
+        System.out.println("5) Add money to account");
+        System.out.println("6) All client money");
+        System.out.println("7) Show all clients");
+        System.out.println("8) Show all accounts");
+        System.out.println("9) Show all currencies");
+        System.out.println("10) Show all transactions");
+        System.out.println("11) Exit");
         System.out.println();
     }
 
@@ -117,7 +130,8 @@ public class MainMenu extends Thread {
         long number = dbHandler.getUniqueAccountNumber();
         Account account = new Account(number, money, client, rate);
         if (dbHandler.addEntityToDB(account)) {
-            System.out.println("Added successfully!\r\n");
+            System.out.println("Added successfully!");
+            System.out.println("Account number = " + number + "\r\n");
         } else {
             System.out.println("Internal error!\r\n");
         }
@@ -139,18 +153,17 @@ public class MainMenu extends Thread {
     }
 
     private void addTransaction() {
-        System.out.print("Type in giver's account ID or number: ");
-        int giver = getIntInput();
-        Account giverAcc = getAccountByIdOrNumber(giver);
+        Account giverAcc = getAccount("giver's ");
         if (giverAcc == null) {
-            System.out.println("No such account!");
+            System.out.println("No such account!\r\n");
             return;
         }
-        System.out.print("Type in receiver's account ID or number: ");
-        int receiver = getIntInput();
-        Account receiverAcc = getAccountByIdOrNumber(receiver);
+        Account receiverAcc = getAccount("receiver's ");
         if (receiverAcc == null) {
-            System.out.println("No such account!");
+            System.out.println("No such account!\r\n");
+            return;
+        } else if (giverAcc.getId() == receiverAcc.getId()) {
+            System.out.println("Can't be the same account!\r\n");
             return;
         }
         System.out.print("Type in amount of money to transfer: ");
@@ -159,19 +172,31 @@ public class MainMenu extends Thread {
         if (transaction.setFinalSum()) {
             giverAcc.subMoney(initialSum);
             receiverAcc.addMoney(transaction.getFinalSum());
-            String giverResult = "Account \"" + giverAcc.getNumber() + "\": withdrawn " +
-                    transaction.getInitialSum() + " " + giverAcc.getRate().getCurrency();
-            String receiverResult = "Account \"" + receiverAcc.getNumber() + "\": deposited " +
-                    transaction.getFinalSum() + " " + receiverAcc.getRate().getCurrency();
             if (dbHandler.addTransaction(transaction, giverAcc, receiverAcc)) {
                 System.out.println("Transfered successfully!");
-                System.out.println(giverResult);
-                System.out.println(receiverResult);
+                System.out.println("Account \"" + giverAcc.getNumber() + "\": withdrawn " +
+                        transaction.getInitialSum() + " " + giverAcc.getRate().getCurrency());
+                System.out.println("Account \"" + receiverAcc.getNumber() + "\": deposited " +
+                        transaction.getFinalSum() + " " + receiverAcc.getRate().getCurrency() + "\r\n");
             } else {
                 System.out.println("Internal error!\r\n");
             }
         } else {
-            System.out.println("Not enough money!");
+            System.out.println("Not enough money!\r\n");
+        }
+    }
+
+    private Account getAccount(String who) {
+        System.out.print("Type in " + who + "account ID or number: ");
+        int id = getIntInput();
+        return getAccountByIdOrNumber(id);
+    }
+
+    private Account getAccountByIdOrNumber(long value) {
+        if (value < 100000000) {
+            return (Account) dbHandler.getEntityById(Account.class, value);
+        } else {
+            return dbHandler.getAccountByNumber(value);
         }
     }
 
@@ -193,12 +218,47 @@ public class MainMenu extends Thread {
         System.out.println("Total in national currency = " + allMoney + "\r\n");
     }
 
-    private Account getAccountByIdOrNumber(long value) {
-        if (value < 100000000) {
-            return (Account) dbHandler.getEntityById(Account.class, value);
-        } else {
-            return (Account) dbHandler.getByEqualUnique(Account.class, "number", value);
+    private void addMoneyToAccount() {
+        Account account = getAccount("");
+        if (account == null) {
+            System.out.println("No such account!\r\n");
+            return;
         }
+        System.out.print("Type in currency ID that you're using: ");
+        int currencyId = getIntInput();
+        Rate rate = (Rate) dbHandler.getEntityById(Rate.class, currencyId);
+        if (rate == null) {
+            System.out.println("No such currency!\r\n");
+            return;
+        }
+        System.out.print("Type in amount of money to add: ");
+        double initialMoney = getDoubleInput();
+        TransactionBank transactionBank = new TransactionBank(account, account, initialMoney, new Date());
+        if (transactionBank.setFinalSum(rate)) {
+            account.addMoney(transactionBank.getFinalSum());
+            if (dbHandler.addTransaction(transactionBank, account, account)) {
+                System.out.println("Successful! Money added to account!\r\n");
+            } else {
+                System.out.println("Internal error!\r\n");
+            }
+        } else {
+            System.out.println("Internal error!\r\n");
+        }
+    }
+
+    private void showAllEntities(Class objectClass) {
+        List result = dbHandler.getAllEntities(objectClass);
+        if (result == null) {
+            System.out.println("Internal error!\r\n");
+            return;
+        } else if (result.isEmpty()) {
+            System.out.println("Nothing is found!\r\n");
+            return;
+        }
+        for (Object object : result) {
+            System.out.println(object);
+        }
+        System.out.println();
     }
 
 

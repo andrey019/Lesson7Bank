@@ -69,4 +69,9 @@ public class Client {
     public void setAccounts(Set<Account> accounts) {
         this.accounts = accounts;
     }
+
+    @Override
+    public String toString() {
+        return "id = " + id + ";\t name = " + name + ";\t surname = " + surname;
+    }
 }

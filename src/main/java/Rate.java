@@ -81,4 +81,9 @@ public class Rate {
     public void setAccounts(Set<Account> accounts) {
         this.accounts = accounts;
     }
+
+    @Override
+    public String toString() {
+        return "id = " + id + ";\t currency = " + currency + "; buy rate = " + buyRate + ";\t sell rate = " + sellRate;
+    }
 }

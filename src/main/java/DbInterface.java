@@ -7,5 +7,5 @@ public interface DbInterface {
     public boolean deleteEntityFromBD(Object...objects);
     public List getAllEntities(Class objectClass);
     public Object getEntityById(Class objectClass, long id);
-    public List getByEqualUnique(Class objectClass, String parameter, Object value);
+    public Account getAccountByNumber(long number);
 }

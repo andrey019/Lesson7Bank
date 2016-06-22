@@ -124,12 +124,12 @@ public class DbHandler implements DbInterface {
     }
 
     @Override
-    public List getByEqualUnique(Class objectClass, String parameter, Object value) {
+    public Account getAccountByNumber(long number) {
         Session session = sessionFactory.openSession();
         try {
-            Criteria criteria = session.createCriteria(objectClass.getClass());
-            criteria.add(Restrictions.eq(parameter, value));
-            List result = criteria.list();
+            Criteria criteria = session.createCriteria(Account.class);
+            criteria.add(Restrictions.eq("number", number));
+            Account result = (Account) criteria.uniqueResult();
             session.close();
             return result;
         } catch (Exception e){
