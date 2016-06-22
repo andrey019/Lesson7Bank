@@ -9,14 +9,14 @@
         <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/lesson7bank</property>
         <property name="hibernate.connection.username">root</property>
         <property name="hibernate.connection.password">password</property>
-        <property name="hibernate.hbm2ddl.auto">create</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="show_sql">false</property>
         <property name="hibernate.use_sql_comments">false</property>
 
         <mapping class="Client"/>
         <mapping class="Account"/>
         <mapping class="Rate"/>
-        <mapping class="Transaction"/>
+        <mapping class="TransactionBank"/>
 
 
     </session-factory>

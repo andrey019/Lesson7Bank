@@ -3,7 +3,7 @@ import java.util.Date;
 
 @Entity
 @Table
-public class Transaction {
+public class TransactionBank {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -11,11 +11,11 @@ public class Transaction {
     @Column(nullable = false)
     private Date date;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "giver_id", nullable = false)
     private Account giver;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "receiver_id", nullable = false)
     private Account receiver;
 
@@ -25,9 +25,9 @@ public class Transaction {
     @Column(nullable = false)
     private double finalSum;
 
-    public Transaction() {}
+    public TransactionBank() {}
 
-    public Transaction(Account giver, Account receiver, double initialSum, Date date) {
+    public TransactionBank(Account giver, Account receiver, double initialSum, Date date) {
         this.giver = giver;
         if (!giver.getTransactionsGiven().contains(this)) {
             giver.getTransactionsGiven().add(this);
@@ -92,17 +92,13 @@ public class Transaction {
 
     public boolean setFinalSum() {
         try {
-            if ( (initialSum > 0) && (receiver != null) && (giver != null)) {
+            if ( (initialSum > 0) && (giver.getMoney() >= initialSum) && (receiver != null) && (giver != null)) {
                 if (receiver.getRate().equals(giver.getRate())) {
-                    giver.setMoney((giver.getMoney() - initialSum));
-                    receiver.setMoney((receiver.getMoney() + initialSum));
                     finalSum = initialSum;
                     return true;
                 } else {
-                    giver.setMoney((giver.getMoney() - initialSum));
-                    double giverConvertion = initialSum * giver.getRate().getSellRate();
-                    double receiverConvertion = giverConvertion / receiver.getRate().getBuyRate();
-                    receiver.setMoney((receiver.getMoney() + receiverConvertion));
+                    double giverConvertion = initialSum * giver.getRate().getBuyRate();
+                    double receiverConvertion = giverConvertion / receiver.getRate().getSellRate();
                     finalSum = receiverConvertion;
                     return true;
                 }

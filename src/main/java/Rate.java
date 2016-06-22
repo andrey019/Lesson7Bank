@@ -1,6 +1,11 @@
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table
@@ -18,10 +23,17 @@ public class Rate {
     @Column(nullable = false)
     private double sellRate;
 
-    @OneToMany(mappedBy = "rate", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Account> accounts = new ArrayList<>();
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "rate", cascade = CascadeType.ALL)
+    private Set<Account> accounts = new HashSet<>();
 
     public Rate() {}
+
+    public Rate(String currency, double buyRate, double sellRate) {
+        this.currency = currency;
+        this.buyRate = buyRate;
+        this.sellRate = sellRate;
+    }
 
     public void addAccount(Account account) {
         accounts.add(account);
@@ -62,11 +74,11 @@ public class Rate {
         this.sellRate = sellRate;
     }
 
-    public List<Account> getAccounts() {
+    public Set<Account> getAccounts() {
         return accounts;
     }
 
-    public void setAccounts(List<Account> accounts) {
+    public void setAccounts(Set<Account> accounts) {
         this.accounts = accounts;
     }
 }

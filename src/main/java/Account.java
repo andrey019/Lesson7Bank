@@ -1,6 +1,11 @@
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table
@@ -15,27 +20,29 @@ public class Account {
     @Column(nullable = false)
     private double money;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rate_id", nullable = false)
     private Rate rate;
 
-    @OneToMany(mappedBy = "giver", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Transaction> transactionsGiven = new ArrayList<>();
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "giver", cascade = CascadeType.REFRESH)
+    private Set<TransactionBank> transactionsGiven = new HashSet<>();
 
-    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Transaction> transactionsReceived = new ArrayList<>();
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.REFRESH)
+    private Set<TransactionBank> transactionsReceived = new HashSet<>();
 
     public Account() {}
 
     public Account(long number, double money, Client client, Rate rate) {
         this.number = number;
         this.money = money;
-        this.client = client;
-        this.rate = rate;
+        setClient(client);
+        setRate(rate);
     }
 
 
@@ -77,6 +84,14 @@ public class Account {
         this.money = money;
     }
 
+    public void addMoney(double money) {
+        this.money += money;
+    }
+
+    public void subMoney(double money) {
+        this.money -= money;
+    }
+
     public Rate getRate() {
         return rate;
     }
@@ -88,30 +103,30 @@ public class Account {
         }
     }
 
-    public List<Transaction> getTransactionsGiven() {
+    public Set<TransactionBank> getTransactionsGiven() {
         return transactionsGiven;
     }
 
-    public void setTransactionsGiven(List<Transaction> transactionsGiven) {
+    public void setTransactionsGiven(Set<TransactionBank> transactionsGiven) {
         this.transactionsGiven = transactionsGiven;
     }
 
-    public List<Transaction> getTransactionsReceived() {
+    public Set<TransactionBank> getTransactionsReceived() {
         return transactionsReceived;
     }
 
-    public void setTransactionsReceived(List<Transaction> transactionsReceived) {
+    public void setTransactionsReceived(Set<TransactionBank> transactionsReceived) {
         this.transactionsReceived = transactionsReceived;
     }
 
-    public void addTransactionGiven(Transaction transaction) {
+    public void addTransactionGiven(TransactionBank transaction) {
         transactionsGiven.add(transaction);
         if (transaction.getGiver() != this) {
             transaction.setGiver(this);
         }
     }
 
-    public void addTransactionReceived(Transaction transaction) {
+    public void addTransactionReceived(TransactionBank transaction) {
         transactionsReceived.add(transaction);
         if (transaction.getReceiver() != this) {
             transaction.setReceiver(this);

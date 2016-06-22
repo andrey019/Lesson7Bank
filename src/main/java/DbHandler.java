@@ -6,6 +6,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Restrictions;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class DbHandler implements DbInterface {
@@ -25,10 +26,31 @@ public class DbHandler implements DbInterface {
                 session.save(object);
             }
             transaction.commit();
+            session.close();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             transaction.rollback();
+            session.close();
+        }
+        return false;
+    }
+
+    public boolean addTransaction(TransactionBank transactionBank, Account giver, Account receiver) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.getTransaction();
+        try {
+            transaction.begin();
+            session.merge(transactionBank);
+            session.merge(giver);
+            session.merge(receiver);
+            transaction.commit();
+            session.close();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            transaction.rollback();
+            session.close();
         }
         return false;
     }
@@ -44,10 +66,9 @@ public class DbHandler implements DbInterface {
                 number = ThreadLocalRandom.current().nextLong(100000000, 999999999);
                 criteria.add(Restrictions.eq("number", number));
                 result = criteria.uniqueResult();
-            } finally {
-                session.close();
-            }
+            } catch (Exception e) {}
             if (result == null) {
+                session.close();
                 return number;
             }
         }
@@ -102,4 +123,19 @@ public class DbHandler implements DbInterface {
         return null;
     }
 
+    @Override
+    public List getByEqualUnique(Class objectClass, String parameter, Object value) {
+        Session session = sessionFactory.openSession();
+        try {
+            Criteria criteria = session.createCriteria(objectClass.getClass());
+            criteria.add(Restrictions.eq(parameter, value));
+            List result = criteria.list();
+            session.close();
+            return result;
+        } catch (Exception e){
+            e.printStackTrace();
+            session.close();
+        }
+        return null;
+    }
 }
