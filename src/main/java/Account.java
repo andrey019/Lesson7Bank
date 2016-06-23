@@ -2,9 +2,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -44,9 +42,6 @@ public class Account {
         setClient(client);
         setRate(rate);
     }
-
-
-    //private List<Transaction> transactions = new ArrayList<>();
 
 
     public long getId() {

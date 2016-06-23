@@ -260,22 +260,4 @@ public class MainMenu extends Thread {
         }
         System.out.println();
     }
-
-
-//
-//    private void delete() {
-//        System.out.print("Type in dish Id: ");
-//        int id = getIntInput();
-//        Menu menu = (Menu) dbHandler.getEntityById(Menu.class, id);
-//        if (menu == null) {
-//            System.out.println("No dish with this id!\r\n");
-//            return;
-//        } else {
-//            if (dbHandler.deleteEntityFromBD(menu)) {
-//                System.out.println("Deleted successfully!\r\n");
-//            } else {
-//                System.out.println("Internal error!\r\n");
-//            }
-//        }
-//    }
 }

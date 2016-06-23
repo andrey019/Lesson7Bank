@@ -1,5 +1,4 @@
 import java.util.List;
-import java.util.Set;
 
 public interface DbInterface {
     public boolean addEntityToDB(Object...objects);
